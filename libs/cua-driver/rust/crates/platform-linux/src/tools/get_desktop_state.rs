@@ -149,8 +149,10 @@ impl Tool for GetDesktopStateTool {
             // Which pid owns which window is what the agent needs before its
             // first click; without it the first action guesses `pid: 1`.
             let mut windows = crate::wayland::list_windows_dispatch(None);
-            windows
-                .retain(|w| w.is_on_screen && w.pid.is_some_and(crate::proc_fs::is_process_live));
+            windows.retain(|w| {
+                crate::wayland::hyprland_agent_ws::present(w)
+                    && w.pid.is_some_and(crate::proc_fs::is_process_live)
+            });
             if let Some(frame) = &hyprland_frame {
                 // Window geometry is in layout coordinates; screenshot pixel
                 // (0, 0) is the frame origin. Refuse rather than pair this

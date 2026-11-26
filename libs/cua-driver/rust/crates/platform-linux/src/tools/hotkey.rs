@@ -144,7 +144,11 @@ impl Tool for HotkeyTool {
                     windows
                         .iter()
                         .find(|w| Some(w.xid) == active && w.pid.is_some())
-                        .or_else(|| windows.iter().find(|w| w.is_on_screen && w.pid.is_some()))
+                        .or_else(|| {
+                            windows.iter().find(|w| {
+                                crate::wayland::hyprland_agent_ws::present(w) && w.pid.is_some()
+                            })
+                        })
                 } else {
                     // The pid's active window, else its largest on-screen
                     // toplevel: LibreOffice and GIMP own hidden/utility
@@ -157,7 +161,7 @@ impl Tool for HotkeyTool {
                         .or_else(|| {
                             windows
                                 .iter()
-                                .filter(|w| w.is_on_screen)
+                                .filter(|w| crate::wayland::hyprland_agent_ws::present(w))
                                 .max_by_key(|w| u64::from(w.width) * u64::from(w.height))
                         })
                         .or_else(|| windows.first())

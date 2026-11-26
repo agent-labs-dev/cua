@@ -43,6 +43,8 @@ mod kill_app;
 #[cfg(target_os = "linux")]
 mod launch_app;
 #[cfg(target_os = "linux")]
+mod launch_hidden;
+#[cfg(target_os = "linux")]
 mod list_apps;
 #[cfg(target_os = "linux")]
 mod list_windows;
