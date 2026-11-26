@@ -11,8 +11,8 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use async_trait::async_trait;
-use cua_driver_core::browser::managed_policy::policy_forces_extensions;
 use cua_driver_core::browser::binding::NativeWindowSize;
+use cua_driver_core::browser::managed_policy::policy_forces_extensions;
 use cua_driver_core::browser::platform::{
     select_isolated_browser_executable, BrowserConsentOutcome, BrowserConsentRequest,
     BrowserPlatform, BrowserVisualAction, BrowserVisualActionKind, ExistingProfileSetupOutcome,
