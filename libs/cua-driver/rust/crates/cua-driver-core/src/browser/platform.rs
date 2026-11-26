@@ -715,6 +715,10 @@ mod tests {
             "platform-macos/src/browser/platform.rs",
             &[
                 (
+                    "owned_native_window_sizes",
+                    "only the Hyprland adapter can enumerate a pid's native window sizes",
+                ),
+                (
                     "spawn_isolated_browser",
                     "the driver launches the isolated browser with its own credentials",
                 ),
@@ -727,6 +731,10 @@ mod tests {
         (
             "platform-windows/src/browser_platform.rs",
             &[
+                (
+                    "owned_native_window_sizes",
+                    "only the Hyprland adapter can enumerate a pid's native window sizes",
+                ),
                 (
                     "security_prompt_open",
                     "Chromium protects its Safe Storage key with DPAPI, which shows no prompt",
