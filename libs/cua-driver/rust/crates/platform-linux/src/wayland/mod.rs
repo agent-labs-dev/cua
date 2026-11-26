@@ -19,6 +19,7 @@ mod dynamic_library;
 pub mod ext_screencopy;
 pub mod ext_toplevel;
 pub mod hyprland;
+pub mod hyprland_agent_ws;
 pub mod hyprland_capture;
 mod hyprland_compatibility;
 pub mod hyprland_input;
@@ -2114,12 +2115,11 @@ pub fn activate_window_for_input_target(
     refuse_kwin_input(window_id)?;
     if is_wayland() && hyprland::is_session() {
         // A full compositor address must never enter the generic protocol-id
-        // or title-matching route. This observation-only adapter can attest an
-        // already-active target, but cannot switch focus to a different one.
+        // or title-matching route: focus moves by exact address only.
         if hyprland::target_is_active(window_id, target_pid)? {
             return Ok(());
         }
-        anyhow::bail!("foreground_unavailable: exact-address Hyprland activation is not implemented; refusing title-based activation");
+        return hyprland_agent_ws::activate(window_id, target_pid);
     }
     if niri::is_session() {
         // A niri id never enters the foreign-toplevel title route: focus the

@@ -83,7 +83,7 @@ fn reap_in_background(mut child: std::process::Child) {
 /// Match a launch_app `name` that failed direct exec against installed XDG
 /// .desktop applications: exact display name, desktop-file id, or `Exec=`
 /// basename first, then a display-name substring when it is unambiguous.
-fn match_installed_app<'a>(
+pub(super) fn match_installed_app<'a>(
     apps: &'a [crate::installed_apps::InstalledApp],
     query: &str,
 ) -> Option<&'a crate::installed_apps::InstalledApp> {
@@ -271,7 +271,11 @@ impl Tool for LaunchAppTool {
                 "name":{"type":"string","description":"App name or command to launch. Tried as a direct command first, then matched against installed .desktop applications (exact display name, desktop-file id, or Exec basename; else an unambiguous display-name substring)."},
                 "bundle_id":{"type":"string","description":"Ignored on Linux (macOS/Windows concept)."},
                 "urls":{"type":"array","items":{"type":"string"},"description":"URLs to open via xdg-open."},
-                "additional_arguments":{"type":"array","items":{"type":"string"},"description":"Extra command-line arguments passed to the launched process."}
+                "additional_arguments":{"type":"array","items":{"type":"string"},"description":"Extra command-line arguments passed to the launched process."},
+                "hidden":{"type":"boolean","description":"Hyprland only. Start the app on the session's hidden special workspace (special:cua-<session>) so it never appears on a screen or takes focus; the window stays listable, capturable and drivable. Default false."},
+                "adopt":{"type":"integer","description":"Hyprland only. Instead of launching, move this native window_id to the session's hidden workspace. Refused for XWayland, grouped, pinned or focused windows."},
+                "release":{"type":"integer","description":"Hyprland only. Instead of launching, give this adopted window_id back to the workspace it came from, unless it has been moved since."},
+                "session":cua_driver_core::tool_schema::session_schema()
             },"additionalProperties":false}),
             read_only: false, destructive: false, idempotent: false, open_world: true,
         })
@@ -298,6 +302,10 @@ impl Tool for LaunchAppTool {
             return ToolResult::error(
                 cua_driver_core::launch_guard::REMOTE_DEBUGGING_LAUNCH_REFUSAL,
             );
+        }
+
+        if super::launch_hidden::requested(&args) {
+            return super::launch_hidden::run(args).await;
         }
 
         if launch_path_opt.is_none() && name_opt.is_none() && urls.is_empty() {
