@@ -27,7 +27,7 @@ jobs:
         run: |
           gh api -X POST "repos/${GITHUB_REPOSITORY}/merge-upstream" -f branch=main --jq '.message'
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: agl
           fetch-depth: 0
