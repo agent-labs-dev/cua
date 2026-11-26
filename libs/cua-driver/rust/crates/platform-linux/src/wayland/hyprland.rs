@@ -251,7 +251,7 @@ fn ipc_path() -> Result<PathBuf> {
     Ok(runtime.join("hypr").join(signature).join(".socket.sock"))
 }
 
-fn ipc_connection() -> Result<UnixStream> {
+pub(super) fn ipc_connection() -> Result<UnixStream> {
     ipc_connection_with_timeout(action_capped(QUERY_TIMEOUT)?)
 }
 
@@ -277,7 +277,7 @@ pub(super) fn verify_capture_peer(connection: &wayland_client::Connection) -> Re
     Ok(())
 }
 
-fn query<T: serde::de::DeserializeOwned>(command: &str) -> Result<T> {
+pub(super) fn query<T: serde::de::DeserializeOwned>(command: &str) -> Result<T> {
     let mut expected_peer = None;
     query_with(
         command,
@@ -375,7 +375,11 @@ fn query_with<T: serde::de::DeserializeOwned>(
     unreachable!("the final query attempt always returns")
 }
 
-fn read_reply(stream: &mut UnixStream, command: &[u8], timeout: Duration) -> Result<Vec<u8>> {
+pub(super) fn read_reply(
+    stream: &mut UnixStream,
+    command: &[u8],
+    timeout: Duration,
+) -> Result<Vec<u8>> {
     let deadline = Instant::now() + timeout;
     stream.set_write_timeout(Some(timeout))?;
     stream.write_all(command)?;
@@ -800,23 +804,9 @@ pub fn cursor_position() -> Result<(f64, f64)> {
     Ok((pos.x, pos.y))
 }
 
-/// Move the pointer (`dispatch movecursor`), no button state. For the
-/// presence shape probe only.
+/// Move the pointer, no button state. For the presence shape probe only.
 pub fn move_cursor(x: f64, y: f64) -> Result<()> {
-    let mut ipc = ipc_connection()?;
-    let command = format!(
-        "dispatch movecursor {} {}",
-        x.round() as i64,
-        y.round() as i64
-    );
-    let reply = read_reply(&mut ipc, command.as_bytes(), action_capped(QUERY_TIMEOUT)?)?;
-    if reply.trim_ascii() != b"ok" {
-        bail!(
-            "Hyprland movecursor refused: {}",
-            String::from_utf8_lossy(&reply)
-        );
-    }
-    Ok(())
+    super::hyprland_agent_ws::move_cursor(x.round() as i64, y.round() as i64)
 }
 
 /// Whether any output is in DPMS standby. The plugin refuses all isolated

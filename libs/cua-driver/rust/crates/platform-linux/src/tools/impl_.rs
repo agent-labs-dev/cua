@@ -114,7 +114,12 @@ fn topmost_window_at(
 ) -> Option<u64> {
     windows
         .iter()
-        .filter(|w| w.pid == Some(pid) && w.is_on_screen && w.width > 0 && w.height > 0)
+        .filter(|w| {
+            w.pid == Some(pid)
+                && crate::wayland::hyprland_agent_ws::present(w)
+                && w.width > 0
+                && w.height > 0
+        })
         .filter(|w| {
             sx >= f64::from(w.x)
                 && sy >= f64::from(w.y)
